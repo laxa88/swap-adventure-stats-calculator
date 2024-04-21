@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+  </head>
+  <body>
+    <div id="txtLevel">1</div>
+    <button id="btnLevel">Clear level</button>
+    <table>
+      <thead>
+        <tr>
+          <th>Hero</th>
+          <th>HP</th>
+          <th>ATK</th>
+          <th>Points</th>
+        </tr>
+      </thead>
+
+      <thead id="body"></thead>
+    </table>
+  </body>
+  <script>
+    const LVL_MAX = 25;
+    const STAT_MAX = 30;
+    const SKILL_MAX = 3;
+
+    let lvl = 1;
+    let points = 0;
+    let spent = 0;
+
+    const heroes = ["warrior", "archer", "mage", "priest"];
+
+    // hp, atk, skill
+    const reqStats = {
+      warrior: [1, 2, 4],
+      archer: [2, 2, 6],
+      mage: [3, 4, 15],
+      priest: [2, 3, 8],
+    };
+
+    const hpStats = {
+      warrior: 4,
+      archer: 3,
+      mage: 1,
+      priest: 2,
+    };
+
+    const atkStats = {
+      warrior: 1,
+      archer: 2,
+      mage: 4,
+      priest: 3,
+    };
+
+    const skillStats = {
+      warrior: 1,
+      archer: 1,
+      mage: 1,
+      priest: 1,
+    };
+
+    const txtLevel = document.getElementById("txtLevel");
+    const btnLevel = document.getElementById("btnLevel");
+
+    const getReqHp = (hero) => {
+      const modifier = Math.ceil(hpStats[hero] / 5);
+      return reqStats[hero][0] * modifier;
+    };
+    const getReqAtk = (hero) => {
+      const modifier = Math.ceil(atkStats[hero] / 5);
+      return reqStats[hero][1] * modifier;
+    };
+    const getReqSkill = (hero) => {
+      const modifier = Math.ceil(skillStats[hero] / 1);
+      return reqStats[hero][2] * modifier;
+    };
+
+    const addHpStat = (hero) => () => {
+      console.log("upgrade hp:", hero);
+      const requiredPoints = getReqHp(hero);
+      const currStat = hpStats[hero];
+      if (points >= requiredPoints && currStat < STAT_MAX) {
+        hpStats[hero] += 1;
+        points -= requiredPoints;
+        spent += requiredPoints;
+        updateLevels();
+        updateStats();
+      }
+    };
+    const addAtkStat = (hero) => () => {
+      console.log("upgrade atk:", hero);
+      const requiredPoints = getReqAtk(hero);
+      const currStat = atkStats[hero];
+      if (points >= requiredPoints && currStat < STAT_MAX) {
+        atkStats[hero] += 1;
+        points -= requiredPoints;
+        spent += requiredPoints;
+        updateLevels();
+        updateStats();
+      }
+    };
+    const addSkillStat = (hero) => () => {
+      console.log("upgrade atk:", hero);
+      const requiredPoints = getReqSkill(hero);
+      const currStat = skillStats[hero];
+      if (points >= requiredPoints && currStat < SKILL_MAX) {
+        skillStats[hero] += 1;
+        points -= requiredPoints;
+        spent += requiredPoints;
+        updateLevels();
+        updateStats();
+      }
+    };
+
+    const updateLevels = () => {
+      txtLevel.innerHTML = `Level: ${lvl}, points: ${points}, spent: ${spent}`;
+      updateStats();
+    };
+
+    const updateStats = () => {
+      console.log("update stats");
+      const body = document.getElementById("body");
+      let rows = [];
+
+      heroes.forEach((hero) => {
+        let hpStr = "";
+        let atkStr = "";
+        let skillStr = "";
+
+        let hpVal = hpStats[hero];
+        let atkVal = atkStats[hero];
+        let skillVal = skillStats[hero];
+
+        for (let i = 0; i < STAT_MAX; i++) {
+          const hpStat = hpStats[hero];
+          if (hpStat > i) {
+            hpStr += "■";
+          } else {
+            hpStr += "□";
+          }
+
+          const atkStat = atkStats[hero];
+          if (atkStat > i) {
+            atkStr += "■";
+          } else {
+            atkStr += "□";
+          }
+        }
+
+        for (let i = 0; i < SKILL_MAX; i++) {
+          const skillStat = skillStats[hero];
+          if (skillStat > i) {
+            skillStr += "■";
+          } else {
+            skillStr += "□";
+          }
+        }
+
+        const row = document.createElement("tr");
+        const cell1 = document.createElement("td");
+        const cell2 = document.createElement("td");
+        const cell3 = document.createElement("td");
+        const cell4 = document.createElement("td");
+
+        cell1.innerHTML = hero;
+
+        const addHpBtn = document.createElement("button");
+        const addHpTxt = document.createElement("span");
+        const reqHp = getReqHp(hero);
+        addHpBtn.innerHTML = `🧡 (${hpVal === STAT_MAX ? 0 : reqHp})`;
+        addHpBtn.addEventListener("click", addHpStat(hero));
+        addHpTxt.innerHTML = ` ${hpStr} = ${hpVal * 5}`;
+        cell2.appendChild(addHpBtn);
+        cell2.appendChild(addHpTxt);
+
+        const addAtkBtn = document.createElement("button");
+        const addAtkTxt = document.createElement("span");
+        const reqAtk = getReqAtk(hero);
+        addAtkBtn.innerHTML = `💣 (${atkVal === STAT_MAX ? 0 : reqAtk})`;
+        addAtkBtn.addEventListener("click", addAtkStat(hero));
+        addAtkTxt.innerHTML = ` ${atkStr} = ${atkVal}`;
+        cell3.appendChild(addAtkBtn);
+        cell3.appendChild(addAtkTxt);
+
+        const addSkillBtn = document.createElement("button");
+        const addSkillTxt = document.createElement("span");
+        const reqSkill = getReqSkill(hero);
+        addSkillBtn.innerHTML = `💣  (${
+          skillVal === SKILL_MAX ? 0 : reqSkill
+        })`;
+        addSkillBtn.addEventListener("click", addSkillStat(hero));
+        addSkillTxt.innerHTML = ` ${skillStr} = ${skillVal}`;
+        cell4.appendChild(addSkillBtn);
+        cell4.appendChild(addSkillTxt);
+
+        row.appendChild(cell1);
+        row.appendChild(cell2);
+        row.appendChild(cell3);
+        row.appendChild(cell4);
+        rows.push(row);
+      });
+
+      body.innerHTML = "";
+      rows.forEach((row) => {
+        body.appendChild(row);
+      });
+    };
+
+    btnLevel.addEventListener("click", () => {
+      const modifier = Math.ceil(lvl / 5) * 1.5;
+      //   const modifier = Math.floor(lvl / 5);
+      if (lvl < LVL_MAX) {
+        lvl += 1;
+        if (lvl % 5 === 1) {
+          points += 10 + Math.floor((10 * modifier) / 2);
+          //   points += 10 + modifier;
+          console.log("BONUS");
+        } else {
+          points += 5 + Math.floor((5 * modifier) / 2);
+          //   points += 5 + modifier;
+        }
+        updateLevels();
+      }
+    });
+
+    updateLevels();
+  </script>
+</html>
